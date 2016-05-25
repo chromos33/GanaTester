@@ -6,8 +6,29 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
-
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="1*"></ColumnDefinition>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="1*"/>
+            <RowDefinition Height="5*"/>
+            <RowDefinition Height="1*"/>
+            <RowDefinition Height="5*"/>
+            <RowDefinition Height="1*"/>
+        </Grid.RowDefinitions>
+        <TextBlock Grid.Row="0" FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center">Hiragana</TextBlock>
+        <Grid Grid.Row="1" x:Name="HiraganaList" Margin="0" Padding="10,0" >
+        
 
+        </Grid>
+        <TextBlock Grid.Row="2" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="20">Katagana</TextBlock>
+        <Grid Grid.Row="3" x:Name="KataganaList" Padding="10,0" >
+
+
+        </Grid>
+        <Button Grid.Row="4" Background="#FF0098D9" BorderBrush="#FF0098D9" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Foreground="White">
+            Start testing
+        </Button>
     </Grid>
 </Page>
