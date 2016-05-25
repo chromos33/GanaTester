@@ -27,6 +27,7 @@ namespace GanaTester
     {
         List<Character> Hiragana;
         List<Character> Katagana;
+        List<Character> Gana;
         public MainPage()
         {
             this.InitializeComponent();
@@ -37,14 +38,8 @@ namespace GanaTester
         {
             Hiragana = new List<Character>();
             Katagana = new List<Character>();
-            if (!(await FileExists("kata.json") && await FileExists("hira.json")))
-            {
-                await SetupGana();
-            }
-            else
-            {
-                await LoadGana();
-            }
+            await SetupGana();
+            await LoadGana();
             int CharactersPerLine = (int)(Window.Current.Bounds.Width / 100);
 
             int i = 0;
@@ -72,6 +67,9 @@ namespace GanaTester
                 checkbox.Content = gana.Gana;
                 checkbox.HorizontalAlignment = HorizontalAlignment.Left;
                 checkbox.VerticalAlignment = VerticalAlignment.Center;
+                checkbox.IsChecked = true;
+                checkbox.Checked += new RoutedEventHandler(GanaChecked);
+                checkbox.Unchecked += new RoutedEventHandler(GanaChecked);
                 HiraganaList.Children.Add(checkbox);
                 Grid.SetRow(checkbox, lines);
                 Grid.SetColumn(checkbox, i);
@@ -100,15 +98,38 @@ namespace GanaTester
                     columscreated++;
                 }
                 CheckBox checkbox = new CheckBox();
-                checkbox.Content = gana.Gana;
+                checkbox.Content = gana;
                 checkbox.HorizontalAlignment = HorizontalAlignment.Left;
                 checkbox.VerticalAlignment = VerticalAlignment.Center;
+                checkbox.IsChecked = true;
+                checkbox.Checked += new RoutedEventHandler(GanaChecked);
+                checkbox.Unchecked += new RoutedEventHandler(GanaChecked);
                 KataganaList.Children.Add(checkbox);
                 Grid.SetRow(checkbox, lines);
                 Grid.SetColumn(checkbox, i);
                 i++;
             }
+            if (!(await FileExists("gana.json")))
+            {
+                Gana = Hiragana.Union(Katagana).ToList();
+                Windows.Storage.StorageFolder storageFolder = Windows.Storage.ApplicationData.Current.LocalFolder;
+                Windows.Storage.StorageFile ganafile = await storageFolder.CreateFileAsync("gana.json");
+                string jsongana = JsonConvert.SerializeObject(Gana);
+                await Windows.Storage.FileIO.WriteTextAsync(ganafile, jsongana);
+            }
+            
         }
+
+        private void GanaChecked(object sender, RoutedEventArgs e)
+        {
+            CheckBox cbGana = (CheckBox)sender;
+            IEnumerable<Character> filter = Gana.Where(x => x.Gana == cbGana.Content);
+            foreach(Character item in filter)
+            {
+                item.bToBeTested = cbGana.IsChecked.Value;
+            }
+        }
+
         public static async Task<bool> FileExists(string _filename)
         {
             try
@@ -124,12 +145,9 @@ namespace GanaTester
         private async Task<bool> LoadGana()
         {
             Windows.Storage.StorageFolder storageFolder = Windows.Storage.ApplicationData.Current.LocalFolder;
-            Windows.Storage.StorageFile katafile = await storageFolder.GetFileAsync("kata.json");
-            Windows.Storage.StorageFile hirafile = await storageFolder.GetFileAsync("hira.json");
-            string kata = await Windows.Storage.FileIO.ReadTextAsync(katafile);
-            string hira = await Windows.Storage.FileIO.ReadTextAsync(hirafile);
-            Katagana = JsonConvert.DeserializeObject<List<Character>>(kata);
-            Hiragana = JsonConvert.DeserializeObject<List<Character>>(hira);
+            Windows.Storage.StorageFile ganafile = await storageFolder.GetFileAsync("gana.json");
+            string gana = await Windows.Storage.FileIO.ReadTextAsync(ganafile);
+            Gana = JsonConvert.DeserializeObject<List<Character>>(gana);
             return true;
         }
         private async Task<bool> SetupGana()
@@ -164,14 +182,13 @@ namespace GanaTester
                     Katagana.Add(new_character);
                 }
             }
-            string jsonkatagana = JsonConvert.SerializeObject(Katagana);
             #endregion
-            Windows.Storage.StorageFolder storageFolder = Windows.Storage.ApplicationData.Current.LocalFolder;
-            Windows.Storage.StorageFile katafile = await storageFolder.CreateFileAsync("kata.json");
-            Windows.Storage.StorageFile hirafile = await storageFolder.CreateFileAsync("hira.json");
-            await Windows.Storage.FileIO.WriteTextAsync(katafile, jsonhiragana);
-            await Windows.Storage.FileIO.WriteTextAsync(hirafile, jsonhiragana);
             return true;
+        }
+
+        private void NavigateToTesting_Click(object sender, RoutedEventArgs e)
+        {
+            this.Frame.Navigate(typeof(StudyPage), Gana);
         }
     }
 }

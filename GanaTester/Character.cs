@@ -12,9 +12,9 @@ namespace GanaTester
         public string Gana;
         public DateTime TestTime;
         public int correct;
+        public bool bToBeTested;
         public Character()
         {
-
         }
         public Character(string _Gana, string _Romaji)
         {
@@ -22,6 +22,11 @@ namespace GanaTester
             Gana = _Gana;
             correct = 0;
             TestTime = DateTime.Now;
+            bToBeTested = true;
+        }
+        public override string ToString()
+        {
+            return Gana;
         }
     }
 }
