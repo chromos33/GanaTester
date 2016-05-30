@@ -117,7 +117,6 @@ namespace GanaTester
                 string jsongana = JsonConvert.SerializeObject(Gana);
                 await Windows.Storage.FileIO.WriteTextAsync(ganafile, jsongana);
             }
-            
         }
 
         private void GanaChecked(object sender, RoutedEventArgs e)
@@ -164,7 +163,7 @@ namespace GanaTester
             {
                 for (int i = 0; i < sRomajiCSV.Split(',').Count(); i++)
                 {
-                    Character new_character = new Character(aHiragana[i], aRomaji[i]);
+                    Character new_character = new Character(aHiragana[i], aRomaji[i],true);
                     Hiragana.Add(new_character);
                 }
             }
@@ -178,7 +177,7 @@ namespace GanaTester
             {
                 for (int i = 0; i < sRomajiCSV.Split(',').Count(); i++)
                 {
-                    Character new_character = new Character(aKatagana[i], aRomaji[i]);
+                    Character new_character = new Character(aKatagana[i], aRomaji[i],false);
                     Katagana.Add(new_character);
                 }
             }
@@ -189,6 +188,15 @@ namespace GanaTester
         private void NavigateToTesting_Click(object sender, RoutedEventArgs e)
         {
             this.Frame.Navigate(typeof(StudyPage), Gana);
+        }
+
+        private async void ResetData_Click(object sender, RoutedEventArgs e)
+        {
+            Gana = Hiragana.Union(Katagana).ToList();
+            Windows.Storage.StorageFolder storageFolder = Windows.Storage.ApplicationData.Current.LocalFolder;
+            Windows.Storage.StorageFile ganafile = await storageFolder.GetFileAsync("gana.json");
+            string jsongana = JsonConvert.SerializeObject(Gana);
+            await Windows.Storage.FileIO.WriteTextAsync(ganafile, jsongana);
         }
     }
 }

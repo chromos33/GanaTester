@@ -10,12 +10,21 @@
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
         <Grid.RowDefinitions>
             <RowDefinition Height="1.5*"></RowDefinition>
-            <RowDefinition Height="6*"></RowDefinition>
+            <RowDefinition Height="4*"></RowDefinition>
             <RowDefinition Height="16*"></RowDefinition>
             <RowDefinition Height="2*"></RowDefinition>
         </Grid.RowDefinitions>
-        <TextBlock x:Name="Romaji" Grid.Row="1"></TextBlock>
+        <TextBlock x:Name="Romaji" Grid.Row="1" TextAlignment="Center" HorizontalAlignment="Center" FontSize="72" VerticalAlignment="Center" Text=""></TextBlock>
+        <Rectangle x:Name="CorrectState" Grid.Row="2" Stroke="Black"></Rectangle>
         <InkCanvas x:Name="Gana" Grid.Row="2"/>
-        <Button Grid.Row="3" x:Name="Answer" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="#FF0098D9" BorderBrush="#FF0098D9" Foreground="White" Click="Answer_Click">Answer</Button>
+        <Grid Grid.Row="3">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*"></ColumnDefinition>
+                <ColumnDefinition Width="1*"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            <Button Grid.Column="0" x:Name="Clear" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="#FF0098D9" BorderBrush="#FF0098D9" Foreground="White" Margin="0,0,5,0" Click="Clear_Click">Clear</Button>
+            <Button Grid.Column="1" x:Name="Answer" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="#FF0098D9" BorderBrush="#FF0098D9" Foreground="White" Click="Answer_Click" Margin="5,0,0,0">Show</Button>
+        </Grid>
+        
     </Grid>
 </Page>

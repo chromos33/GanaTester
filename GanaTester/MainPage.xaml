@@ -28,8 +28,17 @@
 
 
         </Grid>
-        <Button x:Name="NavigateToTesting" Grid.Row="4" Background="#FF0098D9" BorderBrush="#FF0098D9" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Foreground="White" Click="NavigateToTesting_Click">
-            Start testing
-        </Button>
+        <Grid Grid.Row="4">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*"></ColumnDefinition>
+                <ColumnDefinition Width="1*"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            <Button x:Name="ResetData" Grid.Column="0" Background="#FF0098D9" BorderBrush="#FF0098D9" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Foreground="White" Margin="0,0,5,0" Click="ResetData_Click">
+                Reset Data
+            </Button>
+            <Button x:Name="NavigateToTesting" Grid.Column="1" Background="#FF0098D9" BorderBrush="#FF0098D9" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Foreground="White" Click="NavigateToTesting_Click" Margin="5,0,0,0">
+                Start testing
+            </Button>
+        </Grid>
     </Grid>
 </Page>

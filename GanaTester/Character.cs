@@ -13,16 +13,18 @@ namespace GanaTester
         public DateTime TestTime;
         public int correct;
         public bool bToBeTested;
+        public bool isHiragana;
         public Character()
         {
         }
-        public Character(string _Gana, string _Romaji)
+        public Character(string _Gana, string _Romaji,bool _isHirgana)
         {
             Romaji = _Romaji;
             Gana = _Gana;
             correct = 0;
             TestTime = DateTime.Now;
             bToBeTested = true;
+            isHiragana = _isHirgana;
         }
         public override string ToString()
         {
