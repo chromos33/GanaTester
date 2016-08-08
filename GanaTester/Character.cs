@@ -14,6 +14,7 @@ namespace GanaTester
         public int correct;
         public bool bToBeTested;
         public bool isHiragana;
+        public bool isActive;
         public Character()
         {
         }

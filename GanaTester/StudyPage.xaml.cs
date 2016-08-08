@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
+using System.Threading;
 using System.Threading.Tasks;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
@@ -38,9 +39,14 @@ namespace GanaTester
         private InkRecognizer japrecog;
         List<Character> GanaList = null;
         Character currentChar = null;
+        Random random;
+        int TimeLimit = 0;
+        TimeSpan dtTimeLeftInSeconds;
+        Windows.UI.Xaml.DispatcherTimer ClockTimer;
         public StudyPage()
         {
             this.InitializeComponent();
+            random = new Random();
             SystemNavigationManager.GetForCurrentView().AppViewBackButtonVisibility = AppViewBackButtonVisibility.Visible;
             SystemNavigationManager.GetForCurrentView().BackRequested += OnBackRequested;
 
@@ -53,6 +59,7 @@ namespace GanaTester
             drawingAttributes.IgnorePressure = false;
             drawingAttributes.FitToCurve = true;
             Gana.InkPresenter.UpdateDefaultDrawingAttributes(drawingAttributes);
+            Window.Current.CoreWindow.PointerCursor = new Windows.UI.Core.CoreCursor(Windows.UI.Core.CoreCursorType.Cross, 1);
             inkRecognizerContainer = new InkRecognizerContainer();
             recoView = inkRecognizerContainer.GetRecognizers();
             if (recoView.Count() > 0)
@@ -120,18 +127,77 @@ namespace GanaTester
         }
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
-            GanaList = e.Parameter as List<Character>;
+            Tuple<List<Character>, int> Transfer = e.Parameter as Tuple<List<Character>, int>;
+            GanaList = Transfer.Item1;
+            TimeLimit = Transfer.Item2;
+            if(TimeLimit > 0)
+            {
+                dtTimeLeftInSeconds = new TimeSpan(0,0,TimeLimit * 5 * 60);
+                ClockTimer = new DispatcherTimer();
+                ClockTimer.Tick += updateClock;
+                ClockTimer.Interval = new TimeSpan(0, 0, 1);
+                ClockTimer.Start();
+            }
+            
             NextCharacter();
         }
+
+        private void updateClock(object sender, object e)
+        {
+            if(dtTimeLeftInSeconds.TotalSeconds > 0)
+            {
+                dtTimeLeftInSeconds = dtTimeLeftInSeconds.Subtract(new TimeSpan(0, 0, 1));
+                System.Diagnostics.Debug.WriteLine(dtTimeLeftInSeconds.TotalSeconds);
+                if(dtTimeLeftInSeconds.Seconds < 10)
+                {
+                    TimeLimitView.Text = dtTimeLeftInSeconds.Minutes + ":0" + dtTimeLeftInSeconds.Seconds;
+                }
+                else
+                {
+                    TimeLimitView.Text = dtTimeLeftInSeconds.Minutes + ":" + dtTimeLeftInSeconds.Seconds;
+                }
+                
+            }
+            else
+            {
+                if (Frame.CanGoBack)
+                {
+                    Frame.GoBack();
+                }
+                else
+                {
+                    Frame.Navigate(typeof(MainPage));
+                }
+            }
+            
+        }
+
         private void NextCharacter()
         {
             try
             {
+                Answer.Content = "Show";
                 SaveData();
                 Gana.InkPresenter.StrokeContainer.Clear();
                 Convert.ToInt32(true);
-                var query = from gana in GanaList where gana.bToBeTested == true && gana != currentChar orderby gana.correct select gana;
-                currentChar = query.FirstOrDefault();
+                int min = Int32.MaxValue;
+                foreach(var gana in GanaList)
+                {
+                    if(gana.correct == 0)
+                    {
+                        min = 0;
+                    }
+                    else
+                    {
+                        if (gana.correct < min)
+                        {
+                            min = gana.correct;
+                        }
+                    }
+                }
+                var query = from gana in GanaList where gana.bToBeTested == true && gana != currentChar && gana.correct == min select gana;
+                int randomvalue = random.Next(0, query.Count());
+                currentChar = query.ToList()[randomvalue];
                 if(currentChar.isHiragana)
                 {
                     Romaji.Text = currentChar.Romaji.ToUpper() + " (Hiragana)";
@@ -151,6 +217,7 @@ namespace GanaTester
         {
             if (Answer.Content.ToString() == "Show")
             {
+                Gana.InkPresenter.StrokeContainer.Clear();
                 Answer.Content = "Next";
                 IReadOnlyList<InkStroke> currentStrokes = Gana.InkPresenter.StrokeContainer.GetStrokes();
                 if (currentStrokes.Count > 0)

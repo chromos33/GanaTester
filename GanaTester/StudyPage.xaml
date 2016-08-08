@@ -14,6 +14,7 @@
             <RowDefinition Height="16*"></RowDefinition>
             <RowDefinition Height="2*"></RowDefinition>
         </Grid.RowDefinitions>
+        <TextBlock x:Name="TimeLimitView" Grid.Row="0" TextAlignment="Center" HorizontalAlignment="Center" FontSize="72" VerticalAlignment="Center" Text=""></TextBlock>
         <TextBlock x:Name="Romaji" Grid.Row="1" TextAlignment="Center" HorizontalAlignment="Center" FontSize="72" VerticalAlignment="Center" Text=""></TextBlock>
         <Rectangle x:Name="CorrectState" Grid.Row="2" Stroke="Black"></Rectangle>
         <InkCanvas x:Name="Gana" Grid.Row="2"/>

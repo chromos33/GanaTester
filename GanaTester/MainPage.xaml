@@ -17,6 +17,8 @@
             <RowDefinition Height="1*"/>
             <RowDefinition Height="5*"/>
             <RowDefinition Height="1*"/>
+            <RowDefinition Height="1*"/>
+            <RowDefinition Height="1*"/>
         </Grid.RowDefinitions>
         <TextBlock Grid.Row="0" FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center">Hiragana</TextBlock>
         <Grid Grid.Row="1" x:Name="HiraganaList" Margin="0" Padding="10,0" >
@@ -28,7 +30,19 @@
 
 
         </Grid>
-        <Grid Grid.Row="4">
+        <TextBlock Grid.Row="4" FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center">Timelimit</TextBlock>
+        <Grid Grid.Row="5">
+            <ComboBox x:Name="Duration" HorizontalAlignment="Stretch" Margin="0,5" VerticalAlignment="Stretch" SelectionChanged="Duration_SelectionChanged" SelectedIndex="0">
+                <ComboBoxItem  Content="disabled" Height="100" Width="100"/>
+                <ComboBoxItem Content="5 min" Height="100" Width="100"/>
+                <ComboBoxItem Content="10 min" Height="100" Width="100"/>
+                <ComboBoxItem Content="15 min" Height="100" Width="100"/>
+                <ComboBoxItem Content="20 min" Height="100" Width="100"/>
+                <ComboBoxItem Content="25 min" Height="100" Width="100"/>
+                <ComboBoxItem Content="30 min" Height="100" Width="100"/>
+            </ComboBox>
+        </Grid>
+        <Grid Grid.Row="6">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="1*"></ColumnDefinition>
                 <ColumnDefinition Width="1*"></ColumnDefinition>
