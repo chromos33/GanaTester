@@ -195,7 +195,7 @@ namespace GanaTester
                         }
                     }
                 }
-                var query = from gana in GanaList where gana.bToBeTested == true && gana != currentChar && gana.correct == min select gana;
+                var query = from gana in GanaList where gana.bToBeTested == true && gana.isActive && gana != currentChar && gana.correct == min select gana;
                 int randomvalue = random.Next(0, query.Count());
                 currentChar = query.ToList()[randomvalue];
                 if(currentChar.isHiragana)

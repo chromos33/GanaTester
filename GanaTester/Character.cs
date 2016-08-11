@@ -24,7 +24,7 @@ namespace GanaTester
             Gana = _Gana;
             correct = 0;
             TestTime = DateTime.Now;
-            bToBeTested = true;
+            bToBeTested = false;
             isHiragana = _isHirgana;
         }
         public override string ToString()
