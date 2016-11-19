@@ -44,6 +44,7 @@ namespace GanaTester
         TimeSpan dtTimeLeftInSeconds;
         bool finish = false;
         Windows.UI.Xaml.DispatcherTimer ClockTimer;
+        public int mode = 1;
         public StudyPage()
         {
             this.InitializeComponent();
@@ -107,31 +108,83 @@ namespace GanaTester
         }
         private async Task<bool> CheckCharacter(string entry, bool answer = false,int strokecount = 0)
         {
-            if (entry == currentChar.Gana && currentChar.strokeCount == strokecount)
+            if(mode == 1)
             {
-                // Correct
-                CorrectState.Fill = new SolidColorBrush(Windows.UI.Color.FromArgb(255, 0, 255, 0));
-                await Task.Delay(TimeSpan.FromMilliseconds(250));
-                CorrectState.Fill = new SolidColorBrush(Windows.UI.Color.FromArgb(0, 0, 255, 0));
-                currentChar.correct++;
-                NextCharacter();
+                if (currentChar.Check(mode, entry) && currentChar.strokeCount == strokecount)
+                {
+                    // Correct
+                    CorrectState.Fill = new SolidColorBrush(Windows.UI.Color.FromArgb(255, 0, 255, 0));
+                    await Task.Delay(TimeSpan.FromMilliseconds(250));
+                    CorrectState.Fill = new SolidColorBrush(Windows.UI.Color.FromArgb(0, 0, 255, 0));
+                    NextCharacter();
+                }
+                if (currentChar.Check(mode, entry) && answer)
+                {
+                    // Incorrect
+                    CorrectState.Fill = new SolidColorBrush(Windows.UI.Color.FromArgb(255, 255, 0, 0));
+                    await Task.Delay(TimeSpan.FromMilliseconds(250));
+                    CorrectState.Fill = new SolidColorBrush(Windows.UI.Color.FromArgb(0, 255, 0, 0));
+                    currentChar.correct = 0;
+                }
             }
-            if (entry != currentChar.Gana && answer)
+            if(mode == 2)
             {
-                // Incorrect
-                CorrectState.Fill = new SolidColorBrush(Windows.UI.Color.FromArgb(255, 255, 0, 0));
-                await Task.Delay(TimeSpan.FromMilliseconds(250));
-                CorrectState.Fill = new SolidColorBrush(Windows.UI.Color.FromArgb(0, 255, 0, 0));
-                currentChar.correct = 0;
+                if (currentChar.Check(mode, entry))
+                {
+                    // Correct
+                    CorrectState.Fill = new SolidColorBrush(Windows.UI.Color.FromArgb(255, 0, 255, 0));
+                    await Task.Delay(TimeSpan.FromMilliseconds(250));
+                    CorrectState.Fill = new SolidColorBrush(Windows.UI.Color.FromArgb(0, 0, 255, 0));
+                    NextCharacter();
+                }
+                if (currentChar.Check(mode, entry) && answer)
+                {
+                    // Incorrect
+                    CorrectState.Fill = new SolidColorBrush(Windows.UI.Color.FromArgb(255, 255, 0, 0));
+                    await Task.Delay(TimeSpan.FromMilliseconds(250));
+                    CorrectState.Fill = new SolidColorBrush(Windows.UI.Color.FromArgb(0, 255, 0, 0));
+                    currentChar.correct = 0;
+                }
             }
+            
             return true;
         }
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
+            if (recoView.Count() > 0)
+            {
+                foreach (InkRecognizer recognizer in recoView)
+                {
+                    if (mode == 2)
+                    {
+                        if (recognizer.Name == "Microsoft English (US) Handwriting Recognizer")
+                        {
+                            inkRecognizerContainer.SetDefaultRecognizer(recognizer);
 
+                        }
+                    }
+                    if (mode == 1)
+                    {
+                        if (recognizer.Name == "Microsoft 日本語手書き認識エンジン")
+                        {
+                            inkRecognizerContainer.SetDefaultRecognizer(recognizer);
+
+                        }
+                    }
+
+                }
+            }
             Tuple<List<Character>, int, bool> Transfer = e.Parameter as Tuple<List<Character>, int, bool>;
             GanaList = Transfer.Item1;
             TimeLimit = Transfer.Item2;
+            if (Transfer.Item3)
+            {
+                mode = 2;
+            }
+            else
+            {
+                mode = 1;
+            }
             finish = false;
             if (ClockTimer != null)
             {
@@ -226,14 +279,29 @@ namespace GanaTester
                     int randomvalue = random.Next(0, query.Count() - 1);
                     currentChar = query.ToList()[randomvalue];
                 }
-                if(currentChar.isHiragana)
+                if (mode == 1)
                 {
-                    Romaji.Text = currentChar.Romaji.ToUpper() + " (Hiragana)";
+                    if (currentChar.isHiragana)
+                    {
+                        Romaji.Text = currentChar.Romaji.ToUpper() + " (Hiragana)";
+                    }
+                    else
+                    {
+                        Romaji.Text = currentChar.Romaji.ToUpper() + " (Katakana)";
+                    }
                 }
-                else
+                if (mode == 2)
                 {
-                    Romaji.Text = currentChar.Romaji.ToUpper() + " (Katakana)";
+                    if (currentChar.isHiragana)
+                    {
+                        Romaji.Text = currentChar.Gana + " (Hiragana)";
+                    }
+                    else
+                    {
+                        Romaji.Text = currentChar.Gana + " (Katakana)";
+                    }
                 }
+
             }
             catch(Exception ex)
             {

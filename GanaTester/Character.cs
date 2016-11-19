@@ -12,6 +12,7 @@ namespace GanaTester
         public string Gana;
         public DateTime TestTime;
         public int correct;
+        public int mode2correct;
         public bool bToBeTested;
         public bool isHiragana;
         public bool isActive;
@@ -32,6 +33,34 @@ namespace GanaTester
         public override string ToString()
         {
             return Gana;
+        }
+        public bool Check(int mode,string Character,bool practice = false)
+        {
+            // mode = 1 romaji -> gana/kana
+            if(mode == 1)
+            {
+                if(Character.ToLower() == Gana)
+                {
+                    if(!practice)
+                    {
+                        correct++;
+                    }
+                    return true;
+                }
+            }
+            // mode = 2 romaji <- gana/kana
+            if (mode == 2)
+            {
+                if (Character.ToLower() == Romaji)
+                {
+                    if (!practice)
+                    {
+                        mode2correct++;
+                    }
+                    return true;
+                }
+            }
+            return false;
         }
     }
 }

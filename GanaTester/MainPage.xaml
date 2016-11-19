@@ -25,7 +25,7 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="1*"></ColumnDefinition>
             </Grid.ColumnDefinitions>
-            <ToggleSwitch Grid.Column="0" x:Name="ModeSwitcher" Header="" HorizontalAlignment="Center" Margin="0,0,-1,0" VerticalAlignment="Stretch" OffContent="Kana - Rōmaji" OnContent="Rōmaji - Kana"/>
+            <ToggleSwitch Grid.Column="0" x:Name="ModeSwitcher" Header="" HorizontalAlignment="Center" Margin="0,0,-1,0" VerticalAlignment="Stretch" OffContent="Rōmaji - Kana" OnContent="Kana - Rōmaji"/>
         </Grid>
         <Grid Grid.Column="0" Grid.Row="1">
             <Grid.ColumnDefinitions>
