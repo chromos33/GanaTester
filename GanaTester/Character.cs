@@ -15,6 +15,8 @@ namespace GanaTester
         public bool bToBeTested;
         public bool isHiragana;
         public bool isActive;
+        public int strokeCount;
+        public int GroupID;
         public Character()
         {
         }

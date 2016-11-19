@@ -13,6 +13,7 @@
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="1*"/>
+            <RowDefinition Height="1*"/>
             <RowDefinition Height="5*"/>
             <RowDefinition Height="1*"/>
             <RowDefinition Height="5*"/>
@@ -20,20 +21,43 @@
             <RowDefinition Height="1*"/>
             <RowDefinition Height="1*"/>
         </Grid.RowDefinitions>
-        <TextBlock Grid.Row="0" FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center">Hiragana</TextBlock>
-        <Grid Grid.Row="1" x:Name="HiraganaList" Margin="0" Padding="10,0" >
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            <ToggleSwitch Grid.Column="0" x:Name="ModeSwitcher" Header="" HorizontalAlignment="Center" Margin="0,0,-1,0" VerticalAlignment="Stretch" OffContent="Kana - Rōmaji" OnContent="Rōmaji - Kana"/>
+        </Grid>
+        <Grid Grid.Column="0" Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="4*"></ColumnDefinition>
+                <ColumnDefinition Width="2*"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Row="0" FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center">Hiragana</TextBlock>
+            <ToggleSwitch Grid.Column="1" x:Name="ToggleAllHira" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Toggled="ToggleAllHira_Click" Margin="0,0,-11,0"/>
+        </Grid>
+        <Grid Grid.Row="2" x:Name="HiraganaList" Margin="0" Padding="10,0" >
 
 
         </Grid>
-        <TextBlock Grid.Row="2" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="20">Katagana</TextBlock>
-        <Grid Grid.Row="3" x:Name="KataganaList" Padding="10,0" >
+        <Grid Grid.Column="0" Grid.Row="3">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="4*"></ColumnDefinition>
+                <ColumnDefinition Width="2*"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="20">Katakana</TextBlock>
+            <ToggleSwitch Grid.Column="1" x:Name="ToggleAllKata" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Toggled="ToggleAllKata_Click"></ToggleSwitch>
+        </Grid>
+        <Grid Grid.Row="4" x:Name="KataganaList" Padding="10,0" >
 
 
         </Grid>
-        <TextBlock Grid.Row="4" FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center">Timelimit</TextBlock>
-        <Grid Grid.Row="5">
+        <TextBlock Grid.Row="5" FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center">Timelimit</TextBlock>
+        <Grid Grid.Row="6">
             <ComboBox x:Name="Duration" HorizontalAlignment="Stretch" Margin="0,5" VerticalAlignment="Stretch" SelectionChanged="Duration_SelectionChanged" SelectedIndex="0">
                 <ComboBoxItem  Content="disabled" Height="100" Width="100"/>
+                <ComboBoxItem Content="1 min" Height="100" Width="100"/>
+                <ComboBoxItem Content="2 min" Height="100" Width="100"/>
+                <ComboBoxItem Content="3 min" Height="100" Width="100"/>
                 <ComboBoxItem Content="5 min" Height="100" Width="100"/>
                 <ComboBoxItem Content="10 min" Height="100" Width="100"/>
                 <ComboBoxItem Content="15 min" Height="100" Width="100"/>
@@ -42,8 +66,9 @@
                 <ComboBoxItem Content="30 min" Height="100" Width="100"/>
             </ComboBox>
         </Grid>
-        <Grid Grid.Row="6">
+        <Grid Grid.Row="7">
             <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*"></ColumnDefinition>
                 <ColumnDefinition Width="1*"></ColumnDefinition>
                 <ColumnDefinition Width="1*"></ColumnDefinition>
             </Grid.ColumnDefinitions>
@@ -52,6 +77,9 @@
             </Button>
             <Button x:Name="NavigateToTesting" Grid.Column="1" Background="#FF0098D9" BorderBrush="#FF0098D9" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Foreground="White" Click="NavigateToTesting_Click" Margin="5,0,0,0">
                 Start testing
+            </Button>
+            <Button x:Name="NavigateToPractice" Grid.Column="2" Background="#FF0098D9" BorderBrush="#FF0098D9" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Foreground="White" Click="NavigateToPractice_Click" Margin="5,0,0,0">
+                Start practice
             </Button>
         </Grid>
     </Grid>

@@ -28,9 +28,9 @@ namespace GanaTester
     /// <summary>
     /// An empty page that can be used on its own or navigated to within a Frame.
     /// </summary>
-    public sealed partial class StudyPage : Page
+    public sealed partial class PracticePage : Page
     {
-        private StudyPage rootPage;
+        private PracticePage rootPage;
         InkRecognizerContainer inkRecognizerContainer = null;
         private IReadOnlyList<InkRecognizer> recoView = null;
         private Language previousInputLanguage = null;
@@ -42,9 +42,9 @@ namespace GanaTester
         Random random;
         int TimeLimit = 0;
         TimeSpan dtTimeLeftInSeconds;
-        bool finish = false;
         Windows.UI.Xaml.DispatcherTimer ClockTimer;
-        public StudyPage()
+        public Boolean finish = false;
+        public PracticePage()
         {
             this.InitializeComponent();
             random = new Random();
@@ -72,7 +72,6 @@ namespace GanaTester
                         inkRecognizerContainer.SetDefaultRecognizer(recognizer);
 
                     }
-                    //If J - E "Microsoft English (US) Handwriting Recognizer"
                 }
             }
             else
@@ -129,17 +128,16 @@ namespace GanaTester
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
 
-            Tuple<List<Character>, int, bool> Transfer = e.Parameter as Tuple<List<Character>, int, bool>;
+            Tuple<List<Character>, int,bool> Transfer = e.Parameter as Tuple<List<Character>, int,bool>;
             GanaList = Transfer.Item1;
             TimeLimit = Transfer.Item2;
-            finish = false;
-            if (ClockTimer != null)
+            if(ClockTimer != null)
             {
                 ClockTimer.Stop();
             }
-            if (TimeLimit > 2)
+            if(TimeLimit > 2)
             {
-                dtTimeLeftInSeconds = new TimeSpan(0, 0, TimeLimit * 5 * 60);
+                dtTimeLeftInSeconds = new TimeSpan(0,0,TimeLimit * 5 * 60);
                 ClockTimer = new DispatcherTimer();
                 ClockTimer.Tick += updateClock;
                 ClockTimer.Interval = new TimeSpan(0, 0, 1);
@@ -147,7 +145,7 @@ namespace GanaTester
             }
             else
             {
-                if (TimeLimit > 0)
+                if(TimeLimit > 0)
                 {
                     dtTimeLeftInSeconds = new TimeSpan(0, 0, TimeLimit * 1 * 60);
                     ClockTimer = new DispatcherTimer();
@@ -156,7 +154,7 @@ namespace GanaTester
                     ClockTimer.Start();
                 }
             }
-
+            
             NextCharacter();
         }
 
@@ -179,12 +177,11 @@ namespace GanaTester
             {
                 finish = true;
             }
-            
         }
 
         private void NextCharacter()
         {
-            if(finish)
+            if(TimeLimit > 0)
             {
                 if (Frame.CanGoBack)
                 {
@@ -197,36 +194,16 @@ namespace GanaTester
             }
             try
             {
-                Preview.Text = "";
-                Answer.Content = "Show";
-                SaveData();
                 Gana.InkPresenter.StrokeContainer.Clear();
                 Convert.ToInt32(true);
-                int min = Int32.MaxValue;
-                foreach(var gana in GanaList)
-                {
-                    if(gana != currentChar && gana.bToBeTested && gana.isActive)
-                    {
-                        if (gana.correct == 0)
-                        {
-                            min = 0;
-                        }
-                        else
-                        {
-                            if (gana.correct < min)
-                            {
-                                min = gana.correct;
-                            }
-                        }
-                    }
-                }
-                var query = from gana in GanaList where gana.bToBeTested == true && gana.isActive && gana != currentChar && gana.correct == min select gana;
-                if(query.Count() > 0)
+                var query = from gana in GanaList where gana.bToBeTested == true && gana.isActive && gana != currentChar select gana;
+                if (query.Count() > 0)
                 {
                     int randomvalue = random.Next(0, query.Count() - 1);
                     currentChar = query.ToList()[randomvalue];
                 }
-                if(currentChar.isHiragana)
+                Preview.Text = currentChar.Gana;
+                if (currentChar.isHiragana)
                 {
                     Romaji.Text = currentChar.Romaji.ToUpper() + " (Hiragana)";
                 }
@@ -239,40 +216,6 @@ namespace GanaTester
             {
                 System.Diagnostics.Debug.WriteLine(ex.ToString());
             }
-        }
-
-        private async void Answer_Click(object sender, RoutedEventArgs e)
-        {
-            if (Answer.Content.ToString() == "Show")
-            {
-                Preview.Text = currentChar.Gana;
-                Gana.InkPresenter.StrokeContainer.Clear();
-                Answer.Content = "Next";
-                IReadOnlyList<InkStroke> currentStrokes = Gana.InkPresenter.StrokeContainer.GetStrokes();
-                if (currentStrokes.ToList().Count > 0)
-                {
-                    var recognitionResults = await inkRecognizerContainer.RecognizeAsync(Gana.InkPresenter.StrokeContainer, InkRecognitionTarget.All);
-
-                    if (recognitionResults.Count > 0)
-                    {
-                        // Display recognition result
-                        string str = "";
-                        foreach (var r in recognitionResults)
-                        {
-                            str += r.GetTextCandidates()[0];
-                        }
-                        await CheckCharacter(str,true,currentStrokes.Count);
-                    }
-                }
-                Romaji.Text = currentChar.Gana;
-            }
-            else
-            {
-                Preview.Text = "";
-                Answer.Content = "Show";
-                NextCharacter();
-            }
-            
         }
         private void OnBackRequested(object sender, BackRequestedEventArgs e)
         {
@@ -288,13 +231,6 @@ namespace GanaTester
         private void Clear_Click(object sender, RoutedEventArgs e)
         {
             Gana.InkPresenter.StrokeContainer.Clear();
-        }
-        private async void SaveData()
-        {
-            Windows.Storage.StorageFolder storageFolder = Windows.Storage.ApplicationData.Current.LocalFolder;
-            Windows.Storage.StorageFile ganafile = await storageFolder.GetFileAsync("gana.json");
-            string jsongana = JsonConvert.SerializeObject(GanaList);
-            await Windows.Storage.FileIO.WriteTextAsync(ganafile, jsongana);
         }
     }
 }
