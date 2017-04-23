@@ -29,6 +29,7 @@ namespace GanaTester
         List<Character> Katagana;
         List<Character> Gana;
         List<CheckBox> CheckBoxes;
+        private int adCount = 0;
         int TimeLimit = 0;
         public MainPage()
         {
@@ -51,8 +52,28 @@ namespace GanaTester
                 string jsongana = JsonConvert.SerializeObject(Gana);
                 await Windows.Storage.FileIO.WriteTextAsync(ganafile, jsongana);
             }
-            await LoadGana();
-            await UpdateGana();
+            if (!(await RoamingFileExists("gana.json")))
+            {
+                if ((await FileExists("gana.json")))
+                {
+                    await LoadGana();
+                    await UpdateGana();
+                }
+                else
+                {
+                    Gana = Hiragana.Union(Katagana).ToList();
+                }
+                Windows.Storage.StorageFolder storageFolder = Windows.Storage.ApplicationData.Current.RoamingFolder;
+                System.Diagnostics.Debug.WriteLine(Windows.Storage.ApplicationData.Current.RoamingFolder.Path);
+                Windows.Storage.StorageFile ganafile = await storageFolder.CreateFileAsync("gana.json");
+                string jsongana = JsonConvert.SerializeObject(Gana);
+                await Windows.Storage.FileIO.WriteTextAsync(ganafile, jsongana);
+            }
+            else
+            {
+                await LoadRoamingGana();
+                await UpdateGana();
+            }
             int CharactersPerLine = (int)(Window.Current.Bounds.Width / 100);
 
             int i = 0;
@@ -77,7 +98,7 @@ namespace GanaTester
                 }
                 gana.GroupID = GroupCounter;
                 CheckBox checkbox = new CheckBox();
-                checkbox.Content = gana.Gana;
+                checkbox.Content = gana.Gana+"/"+gana.Romaji;
                 checkbox.HorizontalAlignment = HorizontalAlignment.Left;
                 checkbox.VerticalAlignment = VerticalAlignment.Center;
                 IEnumerable<Character> data = Gana.Where(x => x.Gana == gana.Gana);
@@ -93,7 +114,7 @@ namespace GanaTester
                 checkbox.Unchecked += new RoutedEventHandler(GanaChecked);
                 CheckBoxes.Add(checkbox);
                 HiraganaStackPanels[GroupCounter].Children.Add(checkbox);
-                if(KanaGroups[GroupCounter] == ItemsInGroup)
+                if(KanaGroups[GroupCounter] == ItemsInGroup+1)
                 {
                     ItemsInGroup = 0;
                     GroupCounter++;
@@ -141,7 +162,7 @@ namespace GanaTester
                 }
                 gana.GroupID = GroupCounter;
                 CheckBox checkbox = new CheckBox();
-                checkbox.Content = gana.Gana;
+                checkbox.Content = gana.Gana + "/" + gana.Romaji;
                 checkbox.HorizontalAlignment = HorizontalAlignment.Left;
                 checkbox.VerticalAlignment = VerticalAlignment.Center;
                 IEnumerable<Character> data = Gana.Where(x => x.Gana == gana.Gana);
@@ -157,7 +178,7 @@ namespace GanaTester
                 checkbox.Unchecked += new RoutedEventHandler(GanaChecked);
                 CheckBoxes.Add(checkbox);
                 KatakanaStackPanels[GroupCounter].Children.Add(checkbox);
-                if (KanaGroups[GroupCounter] == ItemsInGroup)
+                if (KanaGroups[GroupCounter] == ItemsInGroup+1)
                 {
                     ItemsInGroup = 0;
                     GroupCounter++;
@@ -188,7 +209,6 @@ namespace GanaTester
         private void GroupToggled(object sender, RoutedEventArgs e)
         {
             ToggleSwitch tsSwitch = (ToggleSwitch)sender;
-            System.Diagnostics.Debug.WriteLine(((GroupTag)tsSwitch.Tag).iGroupID);
             if(((GroupTag)tsSwitch.Tag).cGroup == 'h')
             {
                 IEnumerable<Character> filter = Hiragana.Where(x => x.isHiragana == true && x.GroupID == ((GroupTag)tsSwitch.Tag).iGroupID);
@@ -212,7 +232,7 @@ namespace GanaTester
         private async void GanaChecked(object sender, RoutedEventArgs e)
         {
             CheckBox cbGana = (CheckBox)sender;
-            IEnumerable<Character> filter = Gana.Where(x => x.Gana == cbGana.Content.ToString());
+            IEnumerable<Character> filter = Gana.Where(x => cbGana.Content.ToString().Contains(x.Gana));
             foreach(Character item in filter)
             {
                 item.bToBeTested = cbGana.IsChecked.Value;
@@ -232,12 +252,34 @@ namespace GanaTester
                 return false;
             }
         }
+        public static async Task<bool> RoamingFileExists(string _filename)
+        {
+            try
+            {
+                var file = await ApplicationData.Current.RoamingFolder.GetFileAsync(_filename);
+                return true;
+            }
+            catch (FileNotFoundException ex)
+            {
+                return false;
+            }
+        }
         private async Task<bool> LoadGana()
         {
             Windows.Storage.StorageFolder storageFolder = Windows.Storage.ApplicationData.Current.LocalFolder;
             Windows.Storage.StorageFile ganafile = null;
             ganafile = await storageFolder.GetFileAsync("gana.json");
             
+            string gana = await Windows.Storage.FileIO.ReadTextAsync(ganafile);
+            Gana = JsonConvert.DeserializeObject<List<Character>>(gana);
+            return true;
+        }
+        private async Task<bool> LoadRoamingGana()
+        {
+            Windows.Storage.StorageFolder storageFolder = Windows.Storage.ApplicationData.Current.RoamingFolder;
+            Windows.Storage.StorageFile ganafile = null;
+            ganafile = await storageFolder.GetFileAsync("gana.json");
+
             string gana = await Windows.Storage.FileIO.ReadTextAsync(ganafile);
             Gana = JsonConvert.DeserializeObject<List<Character>>(gana);
             return true;
@@ -326,17 +368,26 @@ namespace GanaTester
             }
             if(Gana.Where(x => x.Romaji.ToLower() == "si").Count() > 0)
             {
-                Gana.Where(x => x.Romaji.ToLower() == "si").First().Romaji = "shi";
+                foreach(Character change in Gana.Where(x => x.Romaji.ToLower() == "si"))
+                {
+                    change.Romaji = "shi";
+                }
                 updated = true;
             }
             if (Gana.Where(x => x.Romaji.ToLower() == "ti").Count() > 0)
             {
-                Gana.Where(x => x.Romaji.ToLower() == "ti").First().Romaji = "chi";
+                foreach (Character change in Gana.Where(x => x.Romaji.ToLower() == "ti"))
+                {
+                    change.Romaji = "chi";
+                }
                 updated = true;
             }
             if (Gana.Where(x => x.Romaji.ToLower() == "hu").Count() > 0)
             {
-                Gana.Where(x => x.Romaji.ToLower() == "hu").First().Romaji = "fu";
+                foreach (Character change in Gana.Where(x => x.Romaji.ToLower() == "hu"))
+                {
+                    change.Romaji = "fu";
+                }
                 updated = true;
             }
             if (updated)
@@ -371,6 +422,7 @@ namespace GanaTester
         private async Task<bool> SaveData()
         {
             Windows.Storage.StorageFolder storageFolder = Windows.Storage.ApplicationData.Current.LocalFolder;
+            
             Windows.Storage.StorageFile ganafile = await storageFolder.GetFileAsync("gana.json");
             string jsongana = JsonConvert.SerializeObject(Gana);
             await Windows.Storage.FileIO.WriteTextAsync(ganafile, jsongana);
@@ -382,7 +434,8 @@ namespace GanaTester
             ComboBox durationselector = (ComboBox)sender;
             TimeLimit = durationselector.SelectedIndex;
         }
-        private void ToggleAllHira_Click(object sender, RoutedEventArgs e)
+
+        private void ToggleAllHira_Toggled(object sender, RoutedEventArgs e)
         {
             ToggleSwitch tsSwitch = (ToggleSwitch)sender;
             foreach (Character cChar in Hiragana)
@@ -391,7 +444,8 @@ namespace GanaTester
                 filter2.First().IsChecked = tsSwitch.IsOn;
             }
         }
-        private void ToggleAllKata_Click(object sender, RoutedEventArgs e)
+
+        private void ToggleAllKata_Toggled(object sender, RoutedEventArgs e)
         {
             ToggleSwitch tsSwitch = (ToggleSwitch)sender;
             foreach (Character cChar in Katagana)

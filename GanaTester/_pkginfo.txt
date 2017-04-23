@@ -1,1 +1,1 @@
-C:\Users\Benja\Source\Repos\GanaTester\GanaTester\AppPackages\GanaTester_1.1.9.0\GanaTester_1.1.9.0_x86_x64_arm.appxbundle
+C:\Users\Benja\Source\Repos\GanaTester\GanaTester\AppPackages\GanaTester_1.1.13.0\GanaTester_1.1.13.0_x86_x64_arm.appxbundle

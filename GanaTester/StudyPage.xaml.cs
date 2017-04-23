@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using Microsoft.ApplicationInsights;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -20,6 +21,7 @@ using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
+using Microsoft.Services.Store.Engagement;
 
 // The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=234238
 
@@ -44,6 +46,7 @@ namespace GanaTester
         TimeSpan dtTimeLeftInSeconds;
         bool finish = false;
         Windows.UI.Xaml.DispatcherTimer ClockTimer;
+        StoreServicesCustomEventLogger logger = StoreServicesCustomEventLogger.GetDefault();
         public int mode = 1;
         public StudyPage()
         {
@@ -88,22 +91,29 @@ namespace GanaTester
         }
         private async void InkPresenter_StrokesCollected(InkPresenter sender, InkStrokesCollectedEventArgs args)
         {
-            IReadOnlyList<InkStroke> currentStrokes = Gana.InkPresenter.StrokeContainer.GetStrokes();
-            if (currentStrokes.Count > 0)
+            try
             {
-
-                var recognitionResults = await inkRecognizerContainer.RecognizeAsync(Gana.InkPresenter.StrokeContainer, InkRecognitionTarget.All);
-                if (recognitionResults.Count > 0)
+                IReadOnlyList<InkStroke> currentStrokes = Gana.InkPresenter.StrokeContainer.GetStrokes();
+                if (currentStrokes.Count > 0)
                 {
-                    // Display recognition result
-                    string str = "";
-                    foreach (var r in recognitionResults)
+
+                    var recognitionResults = await inkRecognizerContainer.RecognizeAsync(Gana.InkPresenter.StrokeContainer, InkRecognitionTarget.All);
+                    if (recognitionResults.Count > 0)
                     {
-                        str += r.GetTextCandidates()[0];
+                        // Display recognition result
+                        string str = "";
+                        foreach (var r in recognitionResults)
+                        {
+                            str += r.GetTextCandidates()[0];
+                        }
+                        CheckCharacter(str, false, currentStrokes.Count);
                     }
-                    CheckCharacter(str,false, currentStrokes.Count);
                 }
+            }catch(Exception)
+            {
+                Gana.InkPresenter.StrokeContainer.Clear();
             }
+            
 
         }
         private async Task<bool> CheckCharacter(string entry, bool answer = false,int strokecount = 0)
@@ -190,24 +200,44 @@ namespace GanaTester
             {
                 ClockTimer.Stop();
             }
-            if (TimeLimit > 2)
+            int multiplier = 0;
+            switch(TimeLimit)
             {
-                dtTimeLeftInSeconds = new TimeSpan(0, 0, TimeLimit * 5 * 60);
+                case 1:
+                    multiplier = 1;
+                    break;
+                case 2:
+                    multiplier = 2;
+                    break;
+                case 3:
+                    multiplier = 3;
+                    break;
+                case 4:
+                    multiplier = 5;
+                    break;
+                case 5:
+                    multiplier = 10;
+                    break;
+                case 6:
+                    multiplier = 15;
+                    break;
+                case 7:
+                    multiplier = 20;
+                    break;
+                case 8:
+                    multiplier = 25;
+                    break;
+                case 9:
+                    multiplier = 30;
+                    break;
+            }
+            if(TimeLimit > 0)
+            {
+                dtTimeLeftInSeconds = new TimeSpan(0, 0, multiplier * 1 * 60);
                 ClockTimer = new DispatcherTimer();
                 ClockTimer.Tick += updateClock;
                 ClockTimer.Interval = new TimeSpan(0, 0, 1);
                 ClockTimer.Start();
-            }
-            else
-            {
-                if (TimeLimit > 0)
-                {
-                    dtTimeLeftInSeconds = new TimeSpan(0, 0, TimeLimit * 1 * 60);
-                    ClockTimer = new DispatcherTimer();
-                    ClockTimer.Tick += updateClock;
-                    ClockTimer.Interval = new TimeSpan(0, 0, 1);
-                    ClockTimer.Start();
-                }
             }
 
             NextCharacter();
@@ -237,6 +267,7 @@ namespace GanaTester
 
         private void NextCharacter()
         {
+            logger.Log("Character Studied");
             if(finish)
             {
                 if (Frame.CanGoBack)
@@ -360,6 +391,14 @@ namespace GanaTester
         private async void SaveData()
         {
             Windows.Storage.StorageFolder storageFolder = Windows.Storage.ApplicationData.Current.LocalFolder;
+            Windows.Storage.StorageFile ganafile = await storageFolder.GetFileAsync("gana.json");
+            string jsongana = JsonConvert.SerializeObject(GanaList);
+            await Windows.Storage.FileIO.WriteTextAsync(ganafile, jsongana);
+            SaveRoamingData();
+        }
+        private async void SaveRoamingData()
+        {
+            Windows.Storage.StorageFolder storageFolder = Windows.Storage.ApplicationData.Current.RoamingFolder;
             Windows.Storage.StorageFile ganafile = await storageFolder.GetFileAsync("gana.json");
             string jsongana = JsonConvert.SerializeObject(GanaList);
             await Windows.Storage.FileIO.WriteTextAsync(ganafile, jsongana);

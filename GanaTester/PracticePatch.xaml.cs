@@ -187,26 +187,46 @@ namespace GanaTester
             {
                 ClockTimer.Stop();
             }
-            if(TimeLimit > 2)
+            int multiplier = 0;
+            switch (TimeLimit)
             {
-                dtTimeLeftInSeconds = new TimeSpan(0,0,TimeLimit * 5 * 60);
-                ClockTimer = new DispatcherTimer();
-                ClockTimer.Tick += updateClock;
-                ClockTimer.Interval = new TimeSpan(0, 0, 1);
-                ClockTimer.Start();
+                case 1:
+                    multiplier = 1;
+                    break;
+                case 2:
+                    multiplier = 2;
+                    break;
+                case 3:
+                    multiplier = 3;
+                    break;
+                case 4:
+                    multiplier = 5;
+                    break;
+                case 5:
+                    multiplier = 10;
+                    break;
+                case 6:
+                    multiplier = 15;
+                    break;
+                case 7:
+                    multiplier = 20;
+                    break;
+                case 8:
+                    multiplier = 25;
+                    break;
+                case 9:
+                    multiplier = 30;
+                    break;
             }
-            else
+            if (TimeLimit > 0)
             {
-                if(TimeLimit > 0)
-                {
-                    dtTimeLeftInSeconds = new TimeSpan(0, 0, TimeLimit * 1 * 60);
-                    ClockTimer = new DispatcherTimer();
-                    ClockTimer.Tick += updateClock;
-                    ClockTimer.Interval = new TimeSpan(0, 0, 1);
-                    ClockTimer.Start();
-                }
+                dtTimeLeftInSeconds = new TimeSpan(0, 0, multiplier * 1 * 60);
             }
-            
+            ClockTimer = new DispatcherTimer();
+            ClockTimer.Tick += updateClock;
+            ClockTimer.Interval = new TimeSpan(0, 0, 1);
+            ClockTimer.Start();
+
             NextCharacter();
         }
 
